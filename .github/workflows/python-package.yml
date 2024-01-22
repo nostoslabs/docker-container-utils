@@ -26,10 +26,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
+        python -m pip install --upgrade pip poetry
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f pyproject.toml ]; then pip install -y poetry;poetry install;fi
+        if [ -f pyproject.toml ]; then pip install poetry;poetry install;fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
