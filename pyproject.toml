@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "docker-container-utils"
+version = "0.1.0"
+description = "A little class that wraps the docker sdk for python (if available) and parses docker container names."
+authors = ["Markus Kreitzer <markus.kreitzer@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+docker = "^7.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+black = "^23.12.1"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
