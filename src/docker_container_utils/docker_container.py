@@ -1,13 +1,42 @@
+import json
+import subprocess
 from typing import Dict, Optional
 import warnings
 
+
+def extract_container_info_from_image_file(image_file: str) -> Optional[Dict[str, str]]:
+    """
+    Extracts and returns information about the Docker container from a Docker image file.
+
+    Args:
+        image_file (str): The path to the Docker image file.
+
+    Returns:
+        Optional[Dict[str, str]]: A dictionary containing the extracted container information,
+        or None if the container name is invalid.
+
+    Raises:
+        ValueError: If the container name format is invalid.
+
+    """
+    try:
+        result = subprocess.run(["docker", "inspect", image_file], capture_output=True, text=True, check=True)
+        image_info = json.loads(result.stdout)
+        return image_info[0]["RepoTags"][0]
+    except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+        raise ParsingError(f"Failed to parse container info: {e}")
+
+
 class ParsingError(Exception):
     """Exception raised for errors in parsing container information."""
+
     pass
+
 
 # Attempt to import the docker SDK
 try:
     import docker
+
     DockerSDKBaseClass = docker.models.containers.Container
     docker_client = docker.from_env()
 except ImportError:
@@ -15,13 +44,18 @@ except ImportError:
         object  # Fallback to a basic object if docker-py is not available
     )
     docker_client = None
-    warnings.warn("The Docker SDK for Python is not installed. Install with pip3 install docker")
+    warnings.warn(
+        "The Docker SDK for Python is not installed. Install with pip3 install docker"
+    )
 except docker.errors.DockerException:
     DockerSDKBaseClass = (
         object  # Fallback to a basic object if docker-py is not available
     )
     docker_client = None
-    warnings.warn("We were unable to instantiate a client instance to a running Docker instance.")    
+    warnings.warn(
+        "We were unable to instantiate a client instance to a running Docker instance."
+    )
+
 
 class DockerContainer(DockerSDKBaseClass):
     """
@@ -42,7 +76,9 @@ class DockerContainer(DockerSDKBaseClass):
     def __init__(self, raw_container_name_string: str, enable_client: bool = False):
         # Initialize base class if Docker SDK is available
         if DockerSDKBaseClass is not object and enable_client:
-            super().__init__(client=docker_client, attrs={"Image": raw_container_name_string})
+            super().__init__(
+                client=docker_client, attrs={"Image": raw_container_name_string}
+            )
 
         # Your custom initialization
         self.raw_container_name_string = raw_container_name_string
@@ -54,7 +90,6 @@ class DockerContainer(DockerSDKBaseClass):
             self.tag = self.info["tag"]
         else:
             raise ValueError("Invalid docker image path")
-
     def extract_container_info(self) -> Optional[Dict[str, str]]:
         """
         Extracts and returns information about the Docker container.

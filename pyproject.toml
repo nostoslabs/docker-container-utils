@@ -18,3 +18,8 @@ flake8 = "^7.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Add command line utility to run the retag_and_push_from_dir script.
+[tool.poetry.scripts]
+retag_and_push_from_dir = "docker_container_utils.retag_and_push_from_dir:main"
+
